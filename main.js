@@ -1,5 +1,3 @@
-import * as THREE from 'https://cdn.skypack.dev/three';
-
 const canvas = document.getElementById("cubeCanvas");
 const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -13,16 +11,39 @@ light.position.set(5, 5, 5).normalize();
 scene.add(light);
 
 const textureLoader = new THREE.TextureLoader();
-const logoTexture = textureLoader.load('sumraksha_logo_grid.png');
+const logoTexture = textureLoader.load('sumraksha_logo.png');
 
-const materials = Array(6).fill(new THREE.MeshBasicMaterial({ map: logoTexture }));
-const cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), materials);
-scene.add(cube);
+const group = new THREE.Group();
+const cubeSize = 0.3;
+const spacing = 0.05;
+
+for (let x = -1; x <= 1; x++) {
+  for (let y = -1; y <= 1; y++) {
+    for (let z = -1; z <= 1; z++) {
+      const cubeGeo = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+      const cubeMat = new THREE.MeshBasicMaterial({ map: logoTexture });
+      const cube = new THREE.Mesh(cubeGeo, [
+        cubeMat, cubeMat, cubeMat,
+        cubeMat, cubeMat, cubeMat
+      ]);
+      cube.position.set(
+        x * (cubeSize + spacing),
+        y * (cubeSize + spacing),
+        z * (cubeSize + spacing)
+      );
+      group.add(cube);
+    }
+  }
+}
+
+scene.add(group);
 
 function animate() {
   requestAnimationFrame(animate);
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
+  group.children.forEach((cube, i) => {
+    cube.rotation.x += 0.01 + 0.0005 * i;
+    cube.rotation.y += 0.01 + 0.0005 * (27 - i);
+  });
   renderer.render(scene, camera);
 }
 animate();
